@@ -48,10 +48,11 @@ def initializing(i=0):
             img0 = ImageDraw.Draw(images[i])
             img0.polygon(corner_coordinates)
             # images[i].show()
+
     new_img = Image.new('RGB', (img_width*2, img_height*2), (255, 255, 255))
+    new_img.paste(images[0], (0, img_width))
     new_img.paste(images[1], (0, 0))
     new_img.paste(images[2], (img_width, 0))
-    new_img.paste(images[0], (0, img_width))
     new_img.paste(images[3], (img_width, img_height))
     new_img.save(f'MergeredImg{i}.png')
     new_img.show()
