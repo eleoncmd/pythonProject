@@ -1,33 +1,13 @@
 import random
-import numpy as np
-import matplotlib.image as img
+# import numpy as np
+# import matplotlib.image as img
 from PIL import Image, ImageDraw
 
 
-# def initialaising_array(path_img):
-#     """Инициализация массива пикселями"""
-#     # можно сразу менять разрешение изображения при его считывании (.resize(1024, 1024))
-#     ismg = Image.open(path_img)
-#     left, right = ismg.size
-#     print(left, right, 'hdjshd')
-#     img_to_matrice = img.imread(path_img)
-#     print(img_to_matrice.shape)
-#     # Определение цвета изображения и преображение его в двумерный массив
-#     if img_to_matrice.shape[2] == 3:
-#         img_mat_reshape = img_to_matrice.reshape(img_to_matrice.shape[0], -1)
-#         print(img_mat_reshape)
-#         print("Reshaping to 2D array:", img_mat_reshape.shape)
-#     else:
-#         # remain as it is
-#         img_mat_reshape = img_to_matrice
-#     # Разбиение изображения на 4 участка
-
-def spliting(img_path, numb_slice):
+def spliting(img_path):
+    """Разделение квадратного изображения на 4 равные части"""
     im = Image.open(img_path, 'r')
-    #px = np.asarray(im)
-    #px_array = Image.fromarray(im, 'RGB')
-    #px_array.show()
-    slicewidth, sliceheight = im.size
+    # slicewidth, sliceheight = im.size
 
     im_sliced1 = im.crop((0, 512, 512, 1024))
     im_sliced1 = im_sliced1.save("Test3.png")
@@ -48,22 +28,33 @@ def spliting(img_path, numb_slice):
     # im_open2.show()
     # im_open3.show()
     # im_open4.show()
-
-    #[im_open1, im_open2, im_open3, im_open4]
-    return im_open4
+    return [im_open1, im_open2, im_open3, im_open4]
 
 
-def initializing():
-    corner_numb = random.randint(1, 30)
-    print(corner_numb)
-    corner_coordinates = tuple(random.randint(0, 512) for i in range(corner_numb))
-    print(corner_coordinates)
-    pa = spliting('Testing22.png', 3)
-
-    img0 = ImageDraw.Draw(pa)
-    img0.polygon(corner_coordinates)
-    pa.show()
-
+def initializing(i=0):
+    """Инициализация изображения препятствиями (полигонами)"""
+    i = i+1
+    images = spliting('Test2.png')
+    img_width, img_height = images[0].size
+    for i in range(4):
+        polygon_numb = random.randint(1, 20)
+        print(polygon_numb)
+        print(f'Это участок под номером {i}')
+        for j in range(polygon_numb):
+            corner_numb = random.randint(2, 30)
+            print('Количество вершин - ', corner_numb)
+            corner_coordinates = tuple(random.randint(0, 512) for i in range(corner_numb*2))
+            print('Координаты - ', corner_coordinates)
+            img0 = ImageDraw.Draw(images[i])
+            img0.polygon(corner_coordinates)
+            # images[i].show()
+    new_img = Image.new('RGB', (img_width*2, img_height*2), (255, 255, 255))
+    new_img.paste(images[1], (0, 0))
+    new_img.paste(images[2], (img_width, 0))
+    new_img.paste(images[0], (0, img_width))
+    new_img.paste(images[3], (img_width, img_height))
+    new_img.save(f'MergeredImg{i}.png')
+    new_img.show()
 
 initializing()
-spliting('Testing22.png', 3)
+spliting('Testing22.png')
