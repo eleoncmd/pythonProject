@@ -1,7 +1,9 @@
+import json
 import random
 # import numpy as np
 # import matplotlib.image as img
 from PIL import Image, ImageDraw
+# import json
 
 
 def spliting(img_path):
@@ -78,8 +80,8 @@ def initializing(i=0):
     return class_0, class_1
 
 
-def obstacle_data(coordinates, coors):
-    """Получение данных о препятствиях"""
+def obstacle_data_1(coordinates, coors):
+    """Получение данных о препятствиях - первый вариант"""
 
     coordinates = tuple(int(x) for x in coordinates.split(","))
     if coordinates in coors:
@@ -92,6 +94,33 @@ def obstacle_data(coordinates, coors):
         print('not ok')
 
 
+def obstacle_data_2(inp_coordinates, test_coordinates):
+    """Получение данных о препятствиях - второй вариант"""
+    info = {
+    'corner_numb': None,
+    'existence' : None,
+    'coordinates': None
+    }
+
+    if type(inp_coordinates) == 'tuple':
+        pass
+    else:
+        inp_coordinates = tuple(int(x) for x in inp_coordinates.split(","))
+        if inp_coordinates in test_coordinates:
+            info['corner_numb'] = len(inp_coordinates)
+            info['existence'] = 'Yes'
+            info['coordinates'] = inp_coordinates
+        else:
+            info['corner_numb'] = len(inp_coordinates)
+            info['coordinates'] = inp_coordinates
+    with open('json_file.txt', 'w') as f:
+        f.write(json.dumps(info))
+    with open('json_file.txt') as f:
+        print(f.read())
+
+
+
 c = initializing()
-print('это', c[0])
-obstacle_data(input(), c[0])
+# print('это', c[0])
+obstacle_data_1(input(), c[0])
+obstacle_data_2(input(), c[0])
