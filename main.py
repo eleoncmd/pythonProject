@@ -96,6 +96,7 @@ def obstacle_data_1(coordinates, coors):
 
 def obstacle_data_2(inp_coordinates, test_coordinates):
     """Получение данных о препятствиях - второй вариант"""
+
     info = {
     'corner_numb': None,
     'existence' : None,

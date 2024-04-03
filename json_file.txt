@@ -1,1 +1,1 @@
-{"corner_numb": 8, "existence": "Yes", "coordinates": [262, 104, 486, 67, 218, 163, 404, 506]}
+{"corner_numb": 11, "existence": null, "coordinates": [486, 115, 114, 63, 113, 383, 196, 505, 255, 294, 45]}
