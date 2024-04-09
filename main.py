@@ -2,7 +2,7 @@ import json
 import random
 # import numpy as np
 # import matplotlib.image as img
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageColor
 # import json
 
 
@@ -45,7 +45,6 @@ def initializing(i=0):
 
     for i in range(4):
         polygon_numb = random.randint(1, 10)
-        # polygon_numb = 2
         # print(f'Это участок под номером {i}')
         # print("количество полигонов", polygon_numb)
         for j in range(polygon_numb):
@@ -61,9 +60,10 @@ def initializing(i=0):
             else:
                 """Добавление полигона в класс деревьев"""
                 class_1.append(corner_coordinates)
-            # print('Координаты - ', corner_coordinates)
+
+            color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
             img0 = ImageDraw.Draw(images[i])
-            img0.polygon(corner_coordinates)
+            img0.polygon(corner_coordinates, color)
             # images[i].show()
 
     print('Препятствия 0:', *class_0)
@@ -84,14 +84,32 @@ def obstacle_data_1(coordinates, coors):
     """Получение данных о препятствиях - первый вариант"""
 
     coordinates = tuple(int(x) for x in coordinates.split(","))
-    if coordinates in coors:
-        print('ok')
-        img0 = Image.open('Test2.png')
-        image0 = ImageDraw.Draw(img0)
-        image0.polygon(coordinates)
-        img0.show()
-    else:
-        print('not ok')
+
+
+def point_in_polygon(x, y, verts):
+    """
+    - алгоритм pnpoly
+    - xyverts  [(x1, y1), (x2, y2), (x3, y3), ...]
+    """
+    try:
+        x, y = float(x), float(y)
+    except:
+        return False
+    vertx = [xyvert[0] for xyvert in verts]
+    verty = [xyvert[1] for xyvert in verts]
+
+    # N, максимальное и минимальное значение абсциссы и ордината и определяют, находится ли целевая точка координат в четырехлучевой форме.
+    if not verts or not min(vertx) <= x <= max(vertx) or not min(verty) <= y <= max(verty):
+        return False
+
+        # Предыдущий проход, основной алгоритм частью
+    nvert = len(verts)
+    is_in = False
+    for i in range(nvert):
+        j = nvert - 1 if i == 0 else i - 1
+        if ((verty[i] > y) != (verty[j] > y)) and (
+                x < (vertx[j] - vertx[i]) * (y - verty[i]) / (verty[j] - verty[i]) + vertx[i]):
+            is_in = not is_in
 
 
 def obstacle_data_2(inp_coordinates, test_coordinates):
@@ -99,13 +117,16 @@ def obstacle_data_2(inp_coordinates, test_coordinates):
 
     info = {
     'corner_numb': None,
-    'existence' : None,
+    'existence'  : None,
     'coordinates': None
     }
 
-    if type(inp_coordinates) == 'tuple':
-        pass
+    if type(inp_coordinates) == "<class 'tuple'>":
+        print('все сходится')
     else:
+        ds = type(inp_coordinates)
+        print('тип', ds)
+
         inp_coordinates = tuple(int(x) for x in inp_coordinates.split(","))
         if inp_coordinates in test_coordinates:
             info['corner_numb'] = len(inp_coordinates)
@@ -120,8 +141,7 @@ def obstacle_data_2(inp_coordinates, test_coordinates):
         print(f.read())
 
 
-
 c = initializing()
 # print('это', c[0])
-obstacle_data_1(input(), c[0])
-obstacle_data_2(input(), c[0])
+# obstacle_data_1(input(), c[0])
+# obstacle_data_2(input(), c[0])
