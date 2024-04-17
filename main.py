@@ -40,7 +40,7 @@ def initializing(i=0):
     i = i+1
     class_0 = []
     class_1 = []
-    images = spliting('Test2.png')
+    images = spliting('black_1.png')
     img_width, img_height = images[0].size
 
     for i in range(4):
@@ -86,31 +86,35 @@ def obstacle_data_1(coordinates, coors):
     coordinates = tuple(int(x) for x in coordinates.split(","))
 
 
-def point_in_polygon(x, y, verts):
-    """
-    - алгоритм pnpoly
-    - xyverts  [(x1, y1), (x2, y2), (x3, y3), ...]
-    """
-    try:
-        x, y = float(x), float(y)
-    except:
-        return False
-    vertx = [xyvert[0] for xyvert in verts]
-    verty = [xyvert[1] for xyvert in verts]
+def line_trow_polygon(x1, y1, x2, y2, x3, y3, x4, y4):
+    dot = []
 
-    # N, максимальное и минимальное значение абсциссы и ордината и определяют, находится ли целевая точка координат в четырехлучевой форме.
-    if not verts or not min(vertx) <= x <= max(vertx) or not min(verty) <= y <= max(verty):
-        return False
+    if ((y2-y1)*(x4-x3) - (y4-y3)*(x2-x1)) != 0:# cчитаем определитель матрицы чтобы понять пересекаются линии или нет
+        print((y2-y1)*(x4-x3) - (y4-y3)*(x2-x1))
+        if (y2 - y1) != 0:  # Чтобы не было деления на ноль
+            q = (x2 - x1)/(y1-y2)
+            sn = (x3 - x4) + (y3 - y4)*q
+            if not sn:
+                return 0
+            fn = (x3 - x1) + (y3 - y1) * q
+            n = fn/sn
+        else:
+            if not (y3 - y4):
+                return 0  # b(y)
+            n = (y3 - y1)/(y3 - y4)  # c(y) / b(y)
 
-        # Предыдущий проход, основной алгоритм частью
-    nvert = len(verts)
-    is_in = False
-    for i in range(nvert):
-        j = nvert - 1 if i == 0 else i - 1
-        if ((verty[i] > y) != (verty[j] > y)) and (
-                x < (vertx[j] - vertx[i]) * (y - verty[i]) / (verty[j] - verty[i]) + vertx[i]):
-            is_in = not is_in
-
+        dot.append(x3 + (x4 - x3) * n)
+        dot.append(y3 + (y4 - y3) * n)
+        new_img1 = Image.new('RGB', (1024, 1024), (0, 0, 0))
+        fig1 = ImageDraw.Draw(new_img1)
+        fig2 = ImageDraw.Draw(new_img1)
+        fig2.polygon((x3, y3, x4, y4), (100, 100, 100))
+        fig1.polygon((x1, y1, x2, y2), (255, 255, 255))
+        new_img1.save('Polygon_line.png')
+        new_img1.show()
+        print(1)
+        print(dot[0], dot[1])
+        return dot[0], dot[1]
 
 def obstacle_data_2(inp_coordinates, test_coordinates):
     """Получение данных о препятствиях - второй вариант"""
@@ -126,7 +130,6 @@ def obstacle_data_2(inp_coordinates, test_coordinates):
     else:
         ds = type(inp_coordinates)
         print('тип', ds)
-
         inp_coordinates = tuple(int(x) for x in inp_coordinates.split(","))
         if inp_coordinates in test_coordinates:
             info['corner_numb'] = len(inp_coordinates)
@@ -141,7 +144,41 @@ def obstacle_data_2(inp_coordinates, test_coordinates):
         print(f.read())
 
 
-c = initializing()
+def new_metgod(x1, y1, x2, y2, x3, y3, x4, y4, coordinates):
+    facets = []
+    denominator = (y4 - y3) * (x1 - x2) - (x4 - x3) * (y1 - y2)
+    if denominator == 0:
+        if ((x1 * y2 - x2 * y1) * (x4 - x3) - (x3 * y4 - x4 * y3) * (x2 - x1) == 0) and ((x1 * y2 - x2 * y1) * (y4 - y3) - (x3 * y4 - x4 * y3) * (y2 - y1) == 0):
+            print("Отрезки пересекаются(совпадают)")
+        else:
+            print('Отрезки не пересекаются(параллельны)')
+    else:
+        numerator_a = (x4 - x2) * (y4 - y3) - (x4 - x3) * (y4 - y2)
+        numerator_b = (x1 - x2) * (y4 - y2) - (x4 - x2) * (y1 - y2)
+        Ua = numerator_a / denominator
+        Ub = numerator_b / denominator
+        if Ua >= 0 and Ua <= 1 and Ub >= 0 and Ub <= 1:
+            x = x1 * Ua + x2 * (1 - Ua)
+            y = y1 * Ua + y2 * (1 - Ua)
+            print(x, "\n", y)
+        else:
+            print('Отрезки не пересекаются')
+
+    new_img1 = Image.new('RGB', (1024, 1024), (0, 0, 0))
+    fig1 = ImageDraw.Draw(new_img1)
+    fig2 = ImageDraw.Draw(new_img1)
+    fig2.polygon((x3, y3, x4, y4), (100, 100, 100))
+    fig1.polygon((x1, y1, x2, y2), (255, 255, 255))
+    new_img1.save('Polygon_line1.png')
+    new_img1.show()
+
+
+
+# c = initializing()
+
+#line_trow_polygon(60,1,17, 14,11,7,12,13)
+
+new_metgod(80,12, 3,510,54,78,100,34)
 # print('это', c[0])
 # obstacle_data_1(input(), c[0])
 # obstacle_data_2(input(), c[0])
