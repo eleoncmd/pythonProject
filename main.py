@@ -45,12 +45,9 @@ def initializing(i=0):
 
     for i in range(4):
         polygon_numb = random.randint(1, 10)
-        # print(f'Это участок под номером {i}')
-        # print("количество полигонов", polygon_numb)
+
         for j in range(polygon_numb):
             corner_numb = random.randint(3, 7)
-            # corner_numb = 3
-            # print('Количество вершин - ', corner_numb)
             corner_coordinates = tuple(random.randint(0, 512) for i in range(corner_numb*2))
             # corner_coordinates = (j*10, (j*10+1), j, 0, 1, j*20)
 
@@ -77,7 +74,7 @@ def initializing(i=0):
     new_img.save(f'MergeredImg{i}.png')
     new_img.show()
 
-    return class_0, class_1
+    return class_0, class_1, new_img
 
 
 def obstacle_data_1(coordinates, coors):
@@ -89,7 +86,7 @@ def obstacle_data_1(coordinates, coors):
 def line_trow_polygon(x1, y1, x2, y2, x3, y3, x4, y4):
     dot = []
 
-    if ((y2-y1)*(x4-x3) - (y4-y3)*(x2-x1)) != 0:# cчитаем определитель матрицы чтобы понять пересекаются линии или нет
+    if ((y2-y1)*(x4-x3) - (y4-y3)*(x2-x1)) != 0:  # cчитаем определитель матрицы чтобы понять пересекаются линии или нет
         print((y2-y1)*(x4-x3) - (y4-y3)*(x2-x1))
         if (y2 - y1) != 0:  # Чтобы не было деления на ноль
             q = (x2 - x1)/(y1-y2)
@@ -144,41 +141,67 @@ def obstacle_data_2(inp_coordinates, test_coordinates):
         print(f.read())
 
 
-def new_metgod(x1, y1, x2, y2, x3, y3, x4, y4, coordinates):
-    facets = []
-    denominator = (y4 - y3) * (x1 - x2) - (x4 - x3) * (y1 - y2)
-    if denominator == 0:
-        if ((x1 * y2 - x2 * y1) * (x4 - x3) - (x3 * y4 - x4 * y3) * (x2 - x1) == 0) and ((x1 * y2 - x2 * y1) * (y4 - y3) - (x3 * y4 - x4 * y3) * (y2 - y1) == 0):
-            print("Отрезки пересекаются(совпадают)")
-        else:
-            print('Отрезки не пересекаются(параллельны)')
-    else:
-        numerator_a = (x4 - x2) * (y4 - y3) - (x4 - x3) * (y4 - y2)
-        numerator_b = (x1 - x2) * (y4 - y2) - (x4 - x2) * (y1 - y2)
-        Ua = numerator_a / denominator
-        Ub = numerator_b / denominator
-        if Ua >= 0 and Ua <= 1 and Ub >= 0 and Ub <= 1:
-            x = x1 * Ua + x2 * (1 - Ua)
-            y = y1 * Ua + y2 * (1 - Ua)
-            print(x, "\n", y)
-        else:
-            print('Отрезки не пересекаются')
-
+def new_metgod(coordinates):
+    coordinates_polygon = []
+    print(len(coordinates))
+    x1, y1 = 30, 20
+    x2, y2 = 1000, 1000
     new_img1 = Image.new('RGB', (1024, 1024), (0, 0, 0))
     fig1 = ImageDraw.Draw(new_img1)
     fig2 = ImageDraw.Draw(new_img1)
-    fig2.polygon((x3, y3, x4, y4), (100, 100, 100))
-    fig1.polygon((x1, y1, x2, y2), (255, 255, 255))
-    new_img1.save('Polygon_line1.png')
-    new_img1.show()
+    for i in range(0, len(coordinates)+2, 2):
+        print(i)
+        if (i + 3) < (len(coordinates)):
+            x3, y3 = coordinates[i], coordinates[i+1]
+            x4, y4 = coordinates[i+2], coordinates[i+3]
+            denominator = (y4 - y3) * (x1 - x2) - (x4 - x3) * (y1 - y2)
+            if denominator == 0:
+                if ((x1 * y2 - x2 * y1) * (x4 - x3) - (x3 * y4 - x4 * y3) * (x2 - x1) == 0) and ((x1 * y2 - x2 * y1) * (y4 - y3) - (x3 * y4 - x4 * y3) * (y2 - y1) == 0):
+                    print("Отрезки пересекаются(совпадают)")
+                    # return False
+                else:
+                    print('Отрезки не пересекаются(параллельны)')
+                    # return False
+            else:
+                numerator_a = (x4 - x2) * (y4 - y3) - (x4 - x3) * (y4 - y2)
+                numerator_b = (x1 - x2) * (y4 - y2) - (x4 - x2) * (y1 - y2)
+                Ua = numerator_a / denominator
+                Ub = numerator_b / denominator
+                if Ua >= 0 and Ua <= 1 and Ub >= 0 and Ub <= 1:
+                    x = x1 * Ua + x2 * (1 - Ua)
+                    y = y1 * Ua + y2 * (1 - Ua)
+                    print(x, "\n", y)
+                else:
+                    print('Не пересекаются')
+                    # return False
+        else:
+            x3, y3 = coordinates[i], coordinates[i+1]
+            x4, y4 = coordinates[0], coordinates[1]
+            # return 0
 
+        """Отрисовка полигона с линией"""
+        fig2.polygon((x3, y3, x4, y4), (255, 255, 255))
+        fig1.polygon((x1, y1, x2, y2), (255, 255, 255))
+        new_img1.save('Polygon_line1.png')
+        new_img1.show()
 
+"""def trajectory(x1,y1,x2,y2):
+    res = new_metgod(x1, y1, x2, y2)
+    T = [0,1]
+    Проверка на пересечение
+    if res:
+        pass
+    Проверка на совпадение
+    if res == 'Отрезки пересекаются(совпадают)':
+        return False
 
-# c = initializing()
+"""
+c = initializing()
 
-#line_trow_polygon(60,1,17, 14,11,7,12,13)
+# line_trow_polygon(60,1,17, 14,11,7,12,13)
 
-new_metgod(80,12, 3,510,54,78,100,34)
+new_metgod(c[1][0])
 # print('это', c[0])
 # obstacle_data_1(input(), c[0])
 # obstacle_data_2(input(), c[0])
+
