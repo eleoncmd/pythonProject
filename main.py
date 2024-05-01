@@ -2,6 +2,8 @@ import json
 import random
 # import numpy as np
 # import matplotlib.image as img
+import heapq
+import sys
 from PIL import Image, ImageDraw, ImageColor
 # import json
 
@@ -149,7 +151,7 @@ def new_metgod(coordinates):
     new_img1 = Image.new('RGB', (1024, 1024), (0, 0, 0))
     fig1 = ImageDraw.Draw(new_img1)
     fig2 = ImageDraw.Draw(new_img1)
-    for i in range(0, len(coordinates)+2, 2):
+    for i in range(0, len(coordinates), 2):
         print(i)
         if (i + 3) < (len(coordinates)):
             x3, y3 = coordinates[i], coordinates[i+1]
@@ -185,22 +187,59 @@ def new_metgod(coordinates):
         new_img1.save('Polygon_line1.png')
         new_img1.show()
 
-"""def trajectory(x1,y1,x2,y2):
-    res = new_metgod(x1, y1, x2, y2)
-    T = [0,1]
-    Проверка на пересечение
-    if res:
-        pass
-    Проверка на совпадение
-    if res == 'Отрезки пересекаются(совпадают)':
-        return False
 
-"""
+# def duild_vertexes(coordinates):
+#     t = [0, 1]
+#     xy = []
+#     temp_vertex = [(coordinates[i]*256, coordinates[i-1]*256) for i in range(len(coordinates), 2)]
+#     for
+#
+
+def dijkstra(graph, start):
+    """Алгоритм Дейкстры"""
+
+    # Инициализация расстояний до вершин
+    distances = [vertex*256 for vertex in graph]
+    distances[start] = 0
+
+    # Используем heapq для хранения вершин и их расстояний
+    priority_queue = [(0, start)]
+
+    while priority_queue:
+        current_distance, current_vertex = heapq.heappop(priority_queue)
+
+        if current_distance > distances[current_vertex]:
+            continue
+
+        for neighbor, weight in graph[current_vertex].items():
+            distance = current_distance + weight
+
+            if distance < distances[neighbor]:
+                distances[neighbor] = distance
+                heapq.heappush(priority_queue, (distance, neighbor))
+
+    return distances
+
+# Пример графа
+graph = {
+    'A': {'B': 5, 'C': 3},
+    'B': {'A': 5, 'C': 2, 'D': 1},
+    'C': {'A': 3, 'B': 2, 'D': 6},
+    'D': {'B': 1, 'C': 6}
+}
+
+start_vertex = 'A'
+result = dijkstra(graph, start_vertex)
+
+for vertex, distance in result.items():
+    print(f'Расстояние от вершины {start_vertex} до {vertex} = {distance}')
+
 c = initializing()
 
 # line_trow_polygon(60,1,17, 14,11,7,12,13)
 
 new_metgod(c[1][0])
+dijkstra(c[1][0], 0)
 # print('это', c[0])
 # obstacle_data_1(input(), c[0])
 # obstacle_data_2(input(), c[0])
