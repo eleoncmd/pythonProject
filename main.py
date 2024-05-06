@@ -254,22 +254,21 @@ def broot_force(start, finish, coordinates):
 
     """Перевод координат в пиксели"""
     start, finish = start * 256, finish * 256
-
     coordinates_px = [(coordinates[i - 1] * 256 + 1, coordinates[i] * 256 + 1) for i in
                       range(1, (len(coordinates) + 1), 2)]
-
     """Проверка всего полигона на пересечение"""
-    graph = []
+    graph = ()
+    if 'пересечение':
 
+    """Заполнение матрицы смежности"""
 
-# broot_force(1, 2, (4, 3, 5, 3))
 
 
 c = initializing()
-
 # line_trow_polygon(60,1,17, 14,11,7,12,13)
 
 new_method1((0, 0), (1024, 1024), c[1][0])
+broot_force((0, 0), (1024, 1024), c[1][0])
 # duild_vertexes(c[1][0])
 # dijkstra(c[1][0], 0)
 # print('это', c[0])
