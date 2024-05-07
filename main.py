@@ -259,9 +259,9 @@ def broot_force(start, finish, coordinates):
     """Проверка всего полигона на пересечение"""
     graph = ()
     if 'пересечение':
-
+        pass
     """Заполнение матрицы смежности"""
-
+    pass
 
 
 c = initializing()
