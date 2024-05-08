@@ -158,53 +158,62 @@ def lines_intersection(start, finish, coordinates):
     fig2 = ImageDraw.Draw(new_img1)
     """Подготовка массива для более удобного перебора"""
     coordinates = list(map(tuple, zip(coordinates[::2], coordinates[1::2])))
-    """Создание матрицы смежности"""
-    matrix = [[], []]
+    """Создание  и инициализация матрицы смежности"""
+    matrix = [0] * len(coordinates)
+    for i in range(len(coordinates)):
+        matrix[i] = [0] * len(coordinates)
+    for i in range(len(matrix)):
+        for j in range(len(matrix)):
+            if i == j:
+                matrix[i][j] = 0
+            elif i == len(matrix) - 1:
+                matrix[i][j] = 1
+            else:
+                matrix[i][i + 1] = 1
+                matrix[i][i - 1] = 1
+        print(matrix[i])
     """Проверка на пересечение, совпадение, параллельность"""
     for i in range(1, len(coordinates) + 1):
-        for j in range(1, len(coordinates) + 1):
-            if i == j:
-                matrix[i].append(0)
-            else:
-                if i < len(coordinates):
-                    x3, y3 = coordinates[i - 1][0], coordinates[i - 1][1]
-                    x4, y4 = coordinates[i][0], coordinates[i][1]
-                else:
-                    x3, y3 = coordinates[i - 1][0], coordinates[i - 1][1]
-                    x4, y4 = coordinates[0][0], coordinates[0][1]
-                    # return 0
-                denominator = (y4 - y3) * (x1 - x2) - (x4 - x3) * (y1 - y2)
-                if denominator == 0:
-                    if (((x1 * y2 - x2 * y1) * (x4 - x3) - (x3 * y4 - x4 * y3) * (x2 - x1) == 0) and
-                            ((x1 * y2 - x2 * y1) * (y4 - y3) - (x3 * y4 - x4 * y3) * (y2 - y1) == 0)):
-                        print("Отрезки пересекаются(совпадают)")
-                        # return False
-                    else:
-                        print('Отрезки не пересекаются(параллельны)')
-                        # return False
-                else:
-                    numerator_a = (x4 - x2) * (y4 - y3) - (x4 - x3) * (y4 - y2)
-                    numerator_b = (x1 - x2) * (y4 - y2) - (x4 - x2) * (y1 - y2)
-                    Ua = numerator_a / denominator
-                    Ub = numerator_b / denominator
-                    if Ua >= 0 and Ua <= 1 and Ub >= 0 and Ub <= 1:
-                        x = x1 * Ua + x2 * (1 - Ua)
-                        y = y1 * Ua + y2 * (1 - Ua)
-                        print(x)
-                        print(y)
-                    else:
-                        print('Не пересекаются')
-                        # return False
+        if i < len(coordinates):
+            x3, y3 = coordinates[i - 1][0], coordinates[i - 1][1]
+            x4, y4 = coordinates[i][0], coordinates[i][1]
+        else:
+            x3, y3 = coordinates[i - 1][0], coordinates[i - 1][1]
+            x4, y4 = coordinates[0][0], coordinates[0][1]
+            # return 0
 
-            print(f'x{i - 1}:', x3, f'y{i - 1}:', y3)
-            print(f'x{i}:', x4, f'y{i}:', y4)
+        denominator = (y4 - y3) * (x1 - x2) - (x4 - x3) * (y1 - y2)
+        if denominator == 0:
+            if (((x1 * y2 - x2 * y1) * (x4 - x3) - (x3 * y4 - x4 * y3) * (x2 - x1) == 0) and
+                    ((x1 * y2 - x2 * y1) * (y4 - y3) - (x3 * y4 - x4 * y3) * (y2 - y1) == 0)):
+                print("Отрезки пересекаются(совпадают)")
+                # return False
+            else:
+                print('Отрезки не пересекаются(параллельны)')
+                # return False
+        else:
+            numerator_a = (x4 - x2) * (y4 - y3) - (x4 - x3) * (y4 - y2)
+            numerator_b = (x1 - x2) * (y4 - y2) - (x4 - x2) * (y1 - y2)
+            Ua = numerator_a / denominator
+            Ub = numerator_b / denominator
+            if Ua >= 0 and Ua <= 1 and Ub >= 0 and Ub <= 1:
+                x = x1 * Ua + x2 * (1 - Ua)
+                y = y1 * Ua + y2 * (1 - Ua)
+                print(x)
+                print(y)
+            else:
+                print('Не пересекаются')
+                # return False
+
+        print(f'x{i - 1}:', x3, f'y{i - 1}:', y3)
+        print(f'x{i}:', x4, f'y{i}:', y4)
 
         """Отрисовка полигона с линией"""
         fig2.polygon((x3, y3, x4, y4), (255, 255, 255))
         fig1.polygon((x1, y1, x2, y2), (255, 255, 255))
         new_img1.save('Polygon_line1.png')
 
-        new_img1.show()
+    new_img1.show()
     return new_img1
 
 
@@ -270,9 +279,8 @@ def broot_force(start, finish, coordinates):
 
 c = initializing()
 # line_trow_polygon(60,1,17, 14,11,7,12,13)
-
 lines_intersection((0, 0), (1024, 1024), c[1][0])
-broot_force((0, 0), (1024, 1024), c[1][0])
+# broot_force((0, 0), (1024, 1024), c[1][0])
 # duild_vertexes(c[1][0])
 # dijkstra(c[1][0], 0)
 # print('это', c[0])

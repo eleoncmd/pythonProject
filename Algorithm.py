@@ -1,6 +1,12 @@
-"""
-Алгоритм для 3-й функции
-1. Получение на вход координат вершин многоугольника
-2. Построение путевых точек на расстоянии T от вершины
-3. Применение алгоритма
-"""
+matrix = [[], []]
+for i in range(len(matrix)):
+    for j in range(len(matrix)):
+        if i == j:
+            matrix[i][j].append(0)
+        elif i == len(matrix) - 1:
+            matrix[i][j].append(1)
+        else:
+            matrix[i][i+1].append(1)
+            matrix[i][i-1].append(1)
+
+print()
