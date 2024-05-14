@@ -4,7 +4,7 @@ import random
 # import matplotlib.image as img
 # import heapq
 # import sys
-from PIL import Image, ImageDraw  # ,ImageColor
+from PIL import Image, ImageDraw
 
 
 # import json
@@ -150,9 +150,17 @@ def obstacle_data_2(inp_coordinates, test_coordinates):
 def lines_intersection(start, finish, coordinates):
     """Проверка на пересечение полигона линией"""
 
+    # 0 - отсутствует связь между точками
+    # 1 - есть связь между точками
+    # 2 - отрезки совпадают
+    # 3 - отрезки параллельны
+    # 4 - отрезки пересекаются
+    # 5 - отрезки не пересекаются
+
     """Инициализация координат линии и создание объектов для отрисовки"""
     x1, y1 = start[0], start[1]
     x2, y2 = finish[0], finish[1]
+    points = []
     new_img1 = Image.new('RGB', (1024, 1024), (0, 0, 0))
     fig1 = ImageDraw.Draw(new_img1)
     fig2 = ImageDraw.Draw(new_img1)
@@ -160,61 +168,74 @@ def lines_intersection(start, finish, coordinates):
     coordinates = list(map(tuple, zip(coordinates[::2], coordinates[1::2])))
     """Создание  и инициализация матрицы смежности"""
     matrix = [0] * len(coordinates)
+    print('Матрица смежности')
     for i in range(len(coordinates)):
         matrix[i] = [0] * len(coordinates)
     for i in range(len(matrix)):
         for j in range(len(matrix)):
             if i == j:
                 matrix[i][j] = 0
-            elif i == len(matrix) - 1:
-                matrix[i][j] = 1
+            elif i == (len(matrix) - 1):
+                matrix[len(matrix) - 1][0] = 1
+                matrix[len(matrix) - 1][len(matrix) - 2] = 1
             else:
                 matrix[i][i + 1] = 1
                 matrix[i][i - 1] = 1
         print(matrix[i])
+    print('Матрица инцидентности')
     """Проверка на пересечение, совпадение, параллельность"""
     for i in range(1, len(coordinates) + 1):
-        if i < len(coordinates):
-            x3, y3 = coordinates[i - 1][0], coordinates[i - 1][1]
-            x4, y4 = coordinates[i][0], coordinates[i][1]
-        else:
-            x3, y3 = coordinates[i - 1][0], coordinates[i - 1][1]
-            x4, y4 = coordinates[0][0], coordinates[0][1]
-            # return 0
+        for j in range(1, len(coordinates) + 1):
+            if i != j:
+                if i < len(coordinates):
+                    x3, y3 = coordinates[i - 1][0], coordinates[i - 1][1]
+                    x4, y4 = coordinates[i][0], coordinates[i][1]
+                else:
+                    x3, y3 = coordinates[i - 1][0], coordinates[i - 1][1]
+                    x4, y4 = coordinates[0][0], coordinates[0][1]
+                    # return 0
 
-        denominator = (y4 - y3) * (x1 - x2) - (x4 - x3) * (y1 - y2)
-        if denominator == 0:
-            if (((x1 * y2 - x2 * y1) * (x4 - x3) - (x3 * y4 - x4 * y3) * (x2 - x1) == 0) and
-                    ((x1 * y2 - x2 * y1) * (y4 - y3) - (x3 * y4 - x4 * y3) * (y2 - y1) == 0)):
-                print("Отрезки пересекаются(совпадают)")
-                # return False
+                denominator = (y4 - y3) * (x1 - x2) - (x4 - x3) * (y1 - y2)
+                if denominator == 0:
+                    if (((x1 * y2 - x2 * y1) * (x4 - x3) - (x3 * y4 - x4 * y3) * (x2 - x1) == 0) and
+                            ((x1 * y2 - x2 * y1) * (y4 - y3) - (x3 * y4 - x4 * y3) * (y2 - y1) == 0)):
+                        # print("Отрезки пересекаются(совпадают)")
+                        matrix[i - 1][j - 1] = 2*matrix[i - 1][j - 1]
+                        # return False
+                    else:
+                        # print('Отрезки не пересекаются(параллельны)')
+                        # return False
+                        matrix[i - 1][j - 1] = 3*matrix[i - 1][j - 1]
+                else:
+                    numerator_a = (x4 - x2) * (y4 - y3) - (x4 - x3) * (y4 - y2)
+                    numerator_b = (x1 - x2) * (y4 - y2) - (x4 - x2) * (y1 - y2)
+                    Ua = numerator_a / denominator
+                    Ub = numerator_b / denominator
+                    if Ua >= 0 and Ua <= 1 and Ub >= 0 and Ub <= 1:
+                        x = x1 * Ua + x2 * (1 - Ua)
+                        y = y1 * Ua + y2 * (1 - Ua)
+                        # print(x)
+                        # print(y)
+                        points.append([x, y])
+                        matrix[i - 1][j - 1] = 4*matrix[i - 1][j - 1]
+                    else:
+                        # print('Не пересекаются')
+                        matrix[i - 1][j - 1] = 5*matrix[i - 1][j - 1]
+                        # return False
             else:
-                print('Отрезки не пересекаются(параллельны)')
-                # return False
-        else:
-            numerator_a = (x4 - x2) * (y4 - y3) - (x4 - x3) * (y4 - y2)
-            numerator_b = (x1 - x2) * (y4 - y2) - (x4 - x2) * (y1 - y2)
-            Ua = numerator_a / denominator
-            Ub = numerator_b / denominator
-            if Ua >= 0 and Ua <= 1 and Ub >= 0 and Ub <= 1:
-                x = x1 * Ua + x2 * (1 - Ua)
-                y = y1 * Ua + y2 * (1 - Ua)
-                print(x)
-                print(y)
-            else:
-                print('Не пересекаются')
-                # return False
+                matrix[i - 1][j - 1] = 0
 
-        print(f'x{i - 1}:', x3, f'y{i - 1}:', y3)
-        print(f'x{i}:', x4, f'y{i}:', y4)
+        # print(f'x{i - 1}:', x3, f'y{i - 1}:', y3)
+        # print(f'x{i}:', x4, f'y{i}:', y4)
 
         """Отрисовка полигона с линией"""
         fig2.polygon((x3, y3, x4, y4), (255, 255, 255))
         fig1.polygon((x1, y1, x2, y2), (255, 255, 255))
         new_img1.save('Polygon_line1.png')
-
+        print(matrix[i - 1])
     new_img1.show()
-    return new_img1
+    # можно использовать yeild
+    return matrix, points
 
 
 # def duild_vertexes(coordinates):
@@ -263,26 +284,41 @@ def lines_intersection(start, finish, coordinates):
 #     print(f'Расстояние от вершины {start_vertex} до {vertex} = {distance}')
 
 
-def broot_force(start, finish, coordinates):
+def broot_force(start, finish):
     """Построение тракетории полета с помощью метода грубой силы"""
 
     """Перевод координат в пиксели"""
+    coordinates = initializing()
+    coordinates = coordinates[1][0]
     start, finish = start * 256, finish * 256
-    coordinates_px = [(coordinates[i - 1] * 256 + 1, coordinates[i] * 256 + 1) for i in
+    coordinates_px = [[coordinates[i - 1] * 256 + 1, coordinates[i] * 256 + 1] for i in
                       range(1, (len(coordinates) + 1), 2)]
-    """Проверка всего полигона на пересечение"""
-    graph = ()
+    print('Переведенные в пиксели координаты:')
+    for i in coordinates_px:
+        print(i, '\n')
 
-    """Заполнение матрицы смежности"""
-    pass
+    """Инициализация графа"""
+    graph = lines_intersection(start, finish, coordinates)
+    for i in graph[1]:
+        print(i)
+    """Работа с параметром T"""
+    for i in range(len(graph)):
+        for j in range(len(graph)):
+            # заменить на конструкцию match-case(python 3.10+)
+            if graph[i][j] == 0:
+                continue
+            elif graph[i][j] == 1:
+                continue
+            elif graph[i][j] == 2:
+                # отрезки совпадают
+                coordinates_px[i][j] += 1 * 256
+                print(coordinates_px[i][j])
+            elif graph[i][j] == 3:
+                # отрезки параллельны
+                coordinates_px[i][j] += 0 * 256
+            elif graph[i][j] == 4:
+                # отрезки не пересекаются
+                pass
 
 
-c = initializing()
-# line_trow_polygon(60,1,17, 14,11,7,12,13)
-lines_intersection((0, 0), (1024, 1024), c[1][0])
-# broot_force((0, 0), (1024, 1024), c[1][0])
-# duild_vertexes(c[1][0])
-# dijkstra(c[1][0], 0)
-# print('это', c[0])
-# obstacle_data_1(input(), c[0])
-# obstacle_data_2(input(), c[0])
+broot_force((0, 300), (500, 1000))
