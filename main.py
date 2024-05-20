@@ -1,9 +1,6 @@
 import json
 import random
-# import numpy as np
-# import matplotlib.image as img
-# import heapq
-# import sys
+from shapely.geometry import Polygon
 from PIL import Image, ImageDraw
 
 
@@ -65,7 +62,6 @@ def initializing(i=0):
             color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
             img0 = ImageDraw.Draw(images[i])
             img0.polygon(corner_coordinates, color)
-            # images[i].show()
 
     print('Препятствия 0:', *class_0)
     print('Препятствия 1:', *class_1)
@@ -77,7 +73,6 @@ def initializing(i=0):
     new_img.paste(images[3], (img_width, img_height))
     new_img.save(f'MergeredImg{i}.png')
     new_img.show()
-
     return class_0, class_1, new_img
 
 
@@ -148,6 +143,7 @@ def obstacle_data_2(inp_coordinates, test_coordinates):
 
 
 def lines_intersection(start, finish, coordinates):
+    print(coordinates)
     """Проверка на пересечение полигона линией"""
 
     # 0 - отсутствует связь между точками
@@ -166,6 +162,9 @@ def lines_intersection(start, finish, coordinates):
     fig2 = ImageDraw.Draw(new_img1)
     """Подготовка массива для более удобного перебора"""
     coordinates = list(map(tuple, zip(coordinates[::2], coordinates[1::2])))
+
+
+
     """Создание  и инициализация матрицы смежности"""
     matrix = [0] * len(coordinates)
     print('Матрица смежности')
@@ -229,8 +228,8 @@ def lines_intersection(start, finish, coordinates):
         # print(f'x{i}:', x4, f'y{i}:', y4)
 
         """Отрисовка полигона с линией"""
-        fig2.polygon((x3, y3, x4, y4), (255, 255, 255))
         fig1.polygon((x1, y1, x2, y2), (255, 255, 255))
+        fig2.polygon((x3, y3, x4, y4), (255, 255, 255))
         new_img1.save('Polygon_line1.png')
         print(matrix[i - 1])
     new_img1.show()
@@ -238,50 +237,57 @@ def lines_intersection(start, finish, coordinates):
     return matrix, points
 
 
-# def duild_vertexes(coordinates):
-#     t = [0, 1]
-#     pixel_vertex = [(coordinates[i]*256, coordinates[i-1]*256) for i in range(0, len(coordinates), 2)]
-#     print(pixel_vertex[0])
-#     return 1
+def line_intersection(start, finish, point1, point2):
+    """Проверка на пересечение отрезка линией"""
 
-# def dijkstra(graph, start):
-#     """Алгоритм Дейкстры"""
-#
-#     # Инициализация расстояний до вершин
-#     distances = [vertex*256 for vertex in graph]
-#     distances[start] = 0
-#
-#     # Используем heapq для хранения вершин и их расстояний
-#     priority_queue = [(0, start)]
-#
-#     while priority_queue:
-#         current_distance, current_vertex = heapq.heappop(priority_queue)
-#
-#         if current_distance > distances[current_vertex]:
-#             continue
-#
-#         for neighbor, weight in graph[current_vertex].items():
-#             distance = current_distance + weight
-#
-#             if distance < distances[neighbor]:
-#                 distances[neighbor] = distance
-#                 heapq.heappush(priority_queue, (distance, neighbor))
-#
-#     return distances
-#
-# # Пример графа
-# graph = {
-#     'A': {'B': 5, 'C': 3},
-#     'B': {'A': 5, 'C': 2, 'D': 1},
-#     'C': {'A': 3, 'B': 2, 'D': 6},
-#     'D': {'B': 1, 'C': 6}
-# }
-#
-# start_vertex = 'A'
-# result = dijkstra(graph, start_vertex)
+    # 0 - отсутствует связь между точками
+    # 1 - есть связь между точками
+    # 2 - отрезки совпадают
+    # 3 - отрезки параллельны
+    # 4 - отрезки пересекаются
+    # 5 - отрезки не пересекаются
 
-# for vertex, distance in result.items():
-#     print(f'Расстояние от вершины {start_vertex} до {vertex} = {distance}')
+    """Инициализация координат линии и создание объектов для отрисовки"""
+    x1, y1 = start[0], start[1]
+    x2, y2 = finish[0], finish[1]
+    points = []
+    new_img1 = Image.new('RGB', (1024, 1024), (0, 0, 0))
+    fig1 = ImageDraw.Draw(new_img1)
+    fig2 = ImageDraw.Draw(new_img1)
+
+    """Подготовка массива для более удобного перебора"""
+    # coordinates = list(map(tuple, zip(coordinates[::2], coordinates[1::2])))
+    x3, y3 = point1[0], point1[1]
+    x4, y4 = point2[0], point2[1]
+    denominator = (y4 - y3) * (x1 - x2) - (x4 - x3) * (y1 - y2)
+    if denominator == 0:
+        if (((x1 * y2 - x2 * y1) * (x4 - x3) - (x3 * y4 - x4 * y3) * (x2 - x1) == 0) and
+                ((x1 * y2 - x2 * y1) * (y4 - y3) - (x3 * y4 - x4 * y3) * (y2 - y1) == 0)):
+            print("Отрезки пересекаются(совпадают)")
+        else:
+            print('Отрезки не пересекаются(параллельны)')
+    else:
+        numerator_a = (x4 - x2) * (y4 - y3) - (x4 - x3) * (y4 - y2)
+        numerator_b = (x1 - x2) * (y4 - y2) - (x4 - x2) * (y1 - y2)
+        Ua = numerator_a / denominator
+        Ub = numerator_b / denominator
+        if Ua >= 0 and Ua <= 1 and Ub >= 0 and Ub <= 1:
+            x = x1 * Ua + x2 * (1 - Ua)
+            y = y1 * Ua + y2 * (1 - Ua)
+            print('ТП1', x)
+            print('ТП1', y)
+            points.append([x, y])
+        else:
+            print('Не пересекаются')
+    print(f'x3:', x3, f'y3:', y3)
+    print(f'x4:', x4, f'y4:', y4)
+    new_img1 = Image.new('RGB', (1024, 1024), (0, 0, 0))
+    fig1 = ImageDraw.Draw(new_img1)
+    fig2 = ImageDraw.Draw(new_img1)
+    fig2.polygon((x3, y3, x4, y4), (100, 100, 100))
+    fig1.polygon((x1, y1, x2, y2), (255, 255, 255))
+    new_img1.save('Polygon_line1.png')
+    new_img1.show()
 
 
 def broot_force(start, finish):
@@ -321,4 +327,8 @@ def broot_force(start, finish):
                 pass
 
 
-broot_force((0, 300), (500, 1000))
+c = initializing()
+print('проверка1:', c[0][0][0:2])
+print('проверка2:', c[0][0][2:4])
+line_intersection((0, 0), (1024, 1024), c[0][0][0:2], c[0][0][2:4])
+# broot_force((0, 300), (500, 1000))
