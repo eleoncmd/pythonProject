@@ -1,7 +1,10 @@
 import json
 import random
-from shapely.geometry import Polygon
 from PIL import Image, ImageDraw
+
+
+# import matplotlib as plt
+# import math
 
 
 # import json
@@ -45,7 +48,7 @@ def initializing(i=0):
     img_width, img_height = images[0].size
 
     for i in range(4):
-        polygon_numb = random.randint(1, 10)
+        polygon_numb = random.randint(1, 3)
 
         for j in range(polygon_numb):
             corner_numb = random.randint(3, 7)
@@ -72,14 +75,33 @@ def initializing(i=0):
     new_img.paste(images[2], (img_width, 0))
     new_img.paste(images[3], (img_width, img_height))
     new_img.save(f'MergeredImg{i}.png')
-    new_img.show()
+    # new_img.show()
     return class_0, class_1, new_img
 
 
-def obstacle_data_1(coordinates, coors):
-    """Получение данных о препятствиях - первый вариант"""
+def convex_polygon(coordinates):
+    """Построение выпуклого многоугольника"""
 
-    coordinates = tuple(int(x) for x in coordinates.split(","))
+    """Расчет опорных точек"""
+    ref_points = (coordinates[0]-2, coordinates[1]-2, coordinates[2]+2, coordinates[3]-2, coordinates[2]+2,
+                  coordinates[1]+2, coordinates[0]-2, coordinates[3]+2)
+    print(ref_points)
+    """Построение прямоугольника"""
+    image = Image.new('RGB', (1024, 1024), 'white')
+    draw = ImageDraw.Draw(image)
+    draw.rectangle(coordinates[0:4], 'red')
+    draw.point((ref_points[0], ref_points[1]), 'black')
+    image.show()
+    draw.point((ref_points[2], ref_points[3]), 'black')
+    image.show()
+    draw.point((ref_points[4], ref_points[5]), 'black')
+    image.show()
+    draw.point((ref_points[6], ref_points[7]), 'black')
+    image.show()
+    # draw.point(ref_points, 'black')
+    image.save('Rectangle.png')
+    image.show()
+    return image, ref_points
 
 
 def line_trow_polygon(x1, y1, x2, y2, x3, y3, x4, y4):
@@ -143,7 +165,6 @@ def obstacle_data_2(inp_coordinates, test_coordinates):
 
 
 def lines_intersection(start, finish, coordinates):
-    print(coordinates)
     """Проверка на пересечение полигона линией"""
 
     # 0 - отсутствует связь между точками
@@ -157,13 +178,11 @@ def lines_intersection(start, finish, coordinates):
     x1, y1 = start[0], start[1]
     x2, y2 = finish[0], finish[1]
     points = []
-    new_img1 = Image.new('RGB', (1024, 1024), (0, 0, 0))
+    new_img1 = convex_polygon(coordinates[0:8])[0]
     fig1 = ImageDraw.Draw(new_img1)
     fig2 = ImageDraw.Draw(new_img1)
     """Подготовка массива для более удобного перебора"""
     coordinates = list(map(tuple, zip(coordinates[::2], coordinates[1::2])))
-
-
 
     """Создание  и инициализация матрицы смежности"""
     matrix = [0] * len(coordinates)
@@ -182,6 +201,7 @@ def lines_intersection(start, finish, coordinates):
                 matrix[i][i - 1] = 1
         print(matrix[i])
     print('Матрица инцидентности')
+
     """Проверка на пересечение, совпадение, параллельность"""
     for i in range(1, len(coordinates) + 1):
         for j in range(1, len(coordinates) + 1):
@@ -199,12 +219,12 @@ def lines_intersection(start, finish, coordinates):
                     if (((x1 * y2 - x2 * y1) * (x4 - x3) - (x3 * y4 - x4 * y3) * (x2 - x1) == 0) and
                             ((x1 * y2 - x2 * y1) * (y4 - y3) - (x3 * y4 - x4 * y3) * (y2 - y1) == 0)):
                         # print("Отрезки пересекаются(совпадают)")
-                        matrix[i - 1][j - 1] = 2*matrix[i - 1][j - 1]
+                        matrix[i - 1][j - 1] = 2 * matrix[i - 1][j - 1]
                         # return False
                     else:
                         # print('Отрезки не пересекаются(параллельны)')
                         # return False
-                        matrix[i - 1][j - 1] = 3*matrix[i - 1][j - 1]
+                        matrix[i - 1][j - 1] = 3 * matrix[i - 1][j - 1]
                 else:
                     numerator_a = (x4 - x2) * (y4 - y3) - (x4 - x3) * (y4 - y2)
                     numerator_b = (x1 - x2) * (y4 - y2) - (x4 - x2) * (y1 - y2)
@@ -213,13 +233,13 @@ def lines_intersection(start, finish, coordinates):
                     if Ua >= 0 and Ua <= 1 and Ub >= 0 and Ub <= 1:
                         x = x1 * Ua + x2 * (1 - Ua)
                         y = y1 * Ua + y2 * (1 - Ua)
-                        # print(x)
-                        # print(y)
+                        print(x)
+                        print(y)
                         points.append([x, y])
-                        matrix[i - 1][j - 1] = 4*matrix[i - 1][j - 1]
+                        matrix[i - 1][j - 1] = 4 * matrix[i - 1][j - 1]
                     else:
                         # print('Не пересекаются')
-                        matrix[i - 1][j - 1] = 5*matrix[i - 1][j - 1]
+                        matrix[i - 1][j - 1] = 5 * matrix[i - 1][j - 1]
                         # return False
             else:
                 matrix[i - 1][j - 1] = 0
@@ -276,7 +296,11 @@ def line_intersection(start, finish, point1, point2):
             y = y1 * Ua + y2 * (1 - Ua)
             print('ТП1', x)
             print('ТП1', y)
-            points.append([x, y])
+            x4, y4 = x, y
+            points.append(x3)
+            points.append(y3)
+            points.append(x4)
+            points.append(y4)
         else:
             print('Не пересекаются')
     print(f'x3:', x3, f'y3:', y3)
@@ -284,15 +308,18 @@ def line_intersection(start, finish, point1, point2):
     new_img1 = Image.new('RGB', (1024, 1024), (0, 0, 0))
     fig1 = ImageDraw.Draw(new_img1)
     fig2 = ImageDraw.Draw(new_img1)
-    fig2.polygon((x3, y3, x4, y4), (100, 100, 100))
+    fig2.ellipse(points, (100, 100, 100))
     fig1.polygon((x1, y1, x2, y2), (255, 255, 255))
     new_img1.save('Polygon_line1.png')
     new_img1.show()
+    return points
 
 
-def broot_force(start, finish):
-    """Построение тракетории полета с помощью метода грубой силы"""
+def broot_force(start, finish, coordinates):
+    """Построение тракетории полета с помощью метода грубой силы(полный перебор)"""
 
+    # for i in range(len(coordinates)):
+    #     line_intersection(coordinates[i], coordinates[i+1], coordinates[i+2], coordinates[i+3])
     """Перевод координат в пиксели"""
     coordinates = initializing()
     coordinates = coordinates[1][0]
@@ -328,7 +355,9 @@ def broot_force(start, finish):
 
 
 c = initializing()
-print('проверка1:', c[0][0][0:2])
-print('проверка2:', c[0][0][2:4])
-line_intersection((0, 0), (1024, 1024), c[0][0][0:2], c[0][0][2:4])
+# print('проверка1:', c[1][0][0:2])
+# print('проверка2:', c[1][0][2:4])
+convex_polygon(c[0][0])
+# line_intersection((0, 0), (1024, 1024), c[0][0][0:2], c[0][0][2:4])
+# lines_intersection((0, 0), (1024, 1024), c[0][0][0:8])
 # broot_force((0, 300), (500, 1000))
